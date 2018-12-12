@@ -1,24 +1,25 @@
-FROM ubuntu:14.04
+FROM ubuntu:18.04
 
 ADD entrypoint.sh /bin/entrypoint.sh
+ADD s3ql_chain.sh /bin/s3ql_chain.sh
 
 RUN  export DEBIAN_FRONTEND=noninteractive && \
      apt-get update && \
-     apt-get -y --force-yes install wget apt-transport-https && \
-     wget -qO - https://linuxdesktopcloud.mail.ru/mail.ru-cloud.gpg   | sudo apt-key add - && \
-     echo 'deb https://linuxdesktopcloud.mail.ru/deb default free' > /etc/apt/sources.list.d/mail.ru-cloud.list && \
-     apt-get update && \
-     apt-get -y --force-yes install mail.ru-cloud vnc4server python expect jwm && \
+     apt-get -y install s3ql wget apt-transport-https apt-utils gnupg2 && \
+     apt-get -y install vnc4server python expect jwm locales libqt5widgets5 libqt5x11extras5 libidn11 && \
      mkdir -p /root/.vnc && \
      ln -s /usr/bin/jwm /root/.vnc/xstartup && \
      mkdir /root/Cloud\ Mail.Ru && \
      locale-gen ru_RU.UTF-8
+RUN wget http://r.mail.ru/n183758973 -O mail.ru-cloud_15.06.0110_amd64.deb && \
+    dpkg -i mail.ru-cloud_15.06.0110_amd64.deb
 
 # Set environment variables.
 ENV LANG ru_RU.UTF-8
 ENV HOME /root
 ENV USER root
 ENV DISPLAY :0
+ENV VNCPASS changeme
 
 # Define working directory.
 WORKDIR /root
@@ -26,6 +27,5 @@ WORKDIR /root
 # Define default command.
 # vncserver
 
-#CMD ["bash"]
 EXPOSE 5900
 ENTRYPOINT ["/bin/entrypoint.sh"]
